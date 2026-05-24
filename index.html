@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>OPTIRUTA+ — Integrador de Algoritmos</title>
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: system-ui, sans-serif;
+                background: #0f172a;
+                color: #e2e8f0;
+                min-height: 100vh;
+            }
+            #app {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 0.25rem;
+                color: #38bdf8;
+            }
+            .subtitle {
+                color: #94a3b8;
+                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+            }
+            #layout {
+                display: flex;
+                gap: 1.5rem;
+            }
+            #sidebar {
+                width: 340px;
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            #controls,
+            #results {
+                background: #1e293b;
+                border-radius: 10px;
+                padding: 1.25rem;
+                border: 1px solid #334155;
+            }
+            #controls h3,
+            #results h3 {
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #94a3b8;
+                margin-bottom: 1rem;
+            }
+            .control-row {
+                margin-bottom: 0.75rem;
+            }
+            .control-row label {
+                display: block;
+                font-size: 0.8rem;
+                color: #94a3b8;
+                margin-bottom: 0.25rem;
+            }
+            .control-row input[type="range"] {
+                width: 100%;
+                accent-color: #38bdf8;
+            }
+            .control-row .value {
+                float: right;
+                font-weight: 600;
+                color: #38bdf8;
+            }
+            button {
+                width: 100%;
+                padding: 0.6rem;
+                background: #38bdf8;
+                color: #0f172a;
+                border: none;
+                border-radius: 6px;
+                font-weight: 700;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: background 0.15s;
+            }
+            button:hover {
+                background: #7dd3fc;
+            }
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            canvas {
+                background: #1e293b;
+                border-radius: 10px;
+                border: 1px solid #334155;
+                display: block;
+            }
+            table {
+                width: 100%;
+                font-size: 0.75rem;
+                border-collapse: collapse;
+            }
+            th,
+            td {
+                padding: 0.35rem 0.4rem;
+                text-align: center;
+                border-bottom: 1px solid #334155;
+            }
+            th {
+                color: #94a3b8;
+                font-weight: 600;
+            }
+            td {
+                font-family: monospace;
+            }
+            .badge {
+                display: inline-block;
+                padding: 0.1rem 0.4rem;
+                border-radius: 4px;
+                font-size: 0.65rem;
+                font-weight: 700;
+            }
+            .badge-optimal {
+                background: #166534;
+                color: #86efac;
+            }
+            .badge-heuristic {
+                background: #78350f;
+                color: #fdba74;
+            }
+            .gap-pos {
+                color: #4ade80;
+            }
+            .gap-neg {
+                color: #f87171;
+            }
+            #status {
+                font-size: 0.8rem;
+                color: #94a3b8;
+                text-align: center;
+                padding: 0.5rem;
+            }
+            @media (max-width: 900px) {
+                #layout {
+                    flex-direction: column;
+                }
+                #sidebar {
+                    width: 100%;
+                }
+                canvas {
+                    width: 100%;
+                    height: auto;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <h1>OPTIRUTA+</h1>
+            <p class="subtitle">
+                Integrador de Algoritmos — Divide y Vencerás · Voraz ·
+                Programación Dinámica · Backtracking
+            </p>
+            <div id="layout">
+                <aside id="sidebar">
+                    <div id="controls">
+                        <h3>⚙️ Configuración</h3>
+                        <div class="control-row">
+                            <label
+                                >Clientes
+                                <span class="value" id="clientCountDisplay"
+                                    >5</span
+                                ></label
+                            >
+                            <input
+                                type="range"
+                                id="clientCount"
+                                min="3"
+                                max="12"
+                                value="5"
+                                step="1"
+                            />
+                        </div>
+                        <div class="control-row">
+                            <label
+                                >Capacidad vehículo
+                                <span class="value" id="capacityDisplay"
+                                    >80</span
+                                ></label
+                            >
+                            <input
+                                type="range"
+                                id="capacity"
+                                min="10"
+                                max="200"
+                                value="80"
+                                step="5"
+                            />
+                        </div>
+                        <button id="runBtn">▶ Ejecutar</button>
+                        <div id="status">Listo</div>
+                    </div>
+                    <div id="results">
+                        <h3>📊 Resultados</h3>
+                        <div id="resultsBody">
+                            <p
+                                style="
+                                    color: #64748b;
+                                    font-size: 0.8rem;
+                                    text-align: center;
+                                    padding: 1rem 0;
+                                "
+                            >
+                                Ejecuta una simulación para ver resultados
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+                <main>
+                    <canvas id="canvas" width="600" height="600"></canvas>
+                </main>
+            </div>
+        </div>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+</html>
